@@ -3,7 +3,7 @@
 Unsupervised Spatio-temporal Latent Feature Clustering for Multiple-object Tracking and Segmentation. Accepted for BMVC 2021. Preprint available at ....
 
 ### This repository is for Unsupervised Spatio-temporal Latent Feature Clustering of multiple targets in a video segment ###
-![model_diagramv1](https://bitbucket.org/coviss/Spatio-temporal Clustering/USC_MOTS/raw/master/model_diagramv1.PNG)
+![model_diagramv1](https://bitbucket.org/coviss/USC_MOTS/raw/master/model_diagramv1.PNG)
 ### Requirements: ###
 * create a conda environment 
 conda env create -f requirements.yml
