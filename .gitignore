@@ -4,8 +4,13 @@
 #     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 
 # Node artifact files
-data/
-model/
+#*/*/128_rgb
+#*/*/128_rgb
+#*/*/*/arbit_weight/
+#*/*/*/MTL
+#*/*/*/MTL
+*.npy
+*.ckpt
 
 # Compiled Java class files
 *.class
