@@ -14,9 +14,9 @@ conda env create -f requirements.yml
 
 1. clone this repository
 2. create a conda environment
-'''python
+```python
 conda env create -f requirements.yml
-'''
+```
 3. download pretrained models
 4. download publicly available detections
 5. To test the models
