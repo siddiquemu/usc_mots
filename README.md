@@ -10,10 +10,11 @@ conda env create -f requirements.yml
 * set the data and model path in corresponding scripts
 * for synthetic and foreground (ground truth) data the clustering metrics will appear as follows
 
-### How do I get set up? ###
+### Installation ###
 
-* Summary of set up
-* Configuration
+* 1. clone this repository
+* 2. create a conda environment 
+conda env create -f requirements.yml
 * Dependencies
 * Database configuration
 * How to run tests
