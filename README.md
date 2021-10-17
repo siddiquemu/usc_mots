@@ -13,7 +13,7 @@ conda env create -f requirements.yml
 ### Installation ###
 
 * 1. clone this repository
-* 2. create a conda environment 
+* 2. create a conda environment \\
 conda env create -f requirements.yml
 * Dependencies
 * Database configuration
