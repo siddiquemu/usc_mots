@@ -5,10 +5,10 @@ Unsupervised Spatio-temporal Latent Feature Clustering for Multiple-object Track
 ### This repository is for Unsupervised Spatio-temporal Latent Feature Clustering of multiple targets in a video segment ###
 ![model_diagramv1](images/model_diagramv1.PNG)
 ### Requirements: ###
-* create a conda environment 
-conda env create -f requirements.yml
-* set the data and model path in corresponding scripts
-* for synthetic and foreground (ground truth) data the clustering metrics will appear as follows
+* Python 3.7 
+* Tensorflow-gpu 1.14
+* Keras 2.3.1
+* Pycocotools 2.0
 
 ### Installation ###
 
