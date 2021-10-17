@@ -17,10 +17,16 @@ Unsupervised Spatio-temporal Latent Feature Clustering for Multiple-object Track
 ```python
 conda env create -f requirements.yml
 ```
-3. download pretrained models
-4. download publicly available detections
-5. To test the models
-6. To train the model from scratch
+3. download datasets
+To reproduce the synthetic MNIST-MOT or Sprites-MOT datasets use [tracking-by-anu=imation](https://github.com/zhen-he/tracking-by-animation.git) or 
+```shell
+python3 ./utils/gen_mnist.py
+python3 ./utils/gen_sprite.py
+```
+4. download pretrained models
+5. download publicly available detections
+6. To test the models
+7. To train the models from scratch
 
 ### Contribution guidelines ###
 
