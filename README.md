@@ -1,5 +1,3 @@
-# USC_MOTS #
-
 # Unsupervised Spatio-temporal Latent Feature Clustering for Multiple-object Tracking and Segmentation.
 (Accepted by BMVC 2021). Preprint available at ....
 
