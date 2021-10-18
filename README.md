@@ -46,7 +46,7 @@ python3 ./utils/gen_sprite.py --train 1
 
 2. Qualitative results
 
-![](images/images/mot17_1.gif)  ![](images/mot17_2.gif)
+![](./images/mot17_1.gif)  ![](./images/mot17_2.gif)
 
 ### Citing USC_MOTS ###
 
