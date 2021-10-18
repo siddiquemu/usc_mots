@@ -22,27 +22,38 @@ cd usc_mots
 conda env create -f requirements.yml
 ```
 ### Data Preprocessing ###
-3. Reproduce the synthetic MNIST-MOT and Sprites-MOT datasets, use [tracking-by-animation](https://github.com/zhen-he/tracking-by-animation.git) or
+1. Reproduce the synthetic MNIST-MOT and Sprites-MOT datasets, use [tracking-by-animation](https://github.com/zhen-he/tracking-by-animation.git) or
 ```shell
 python3 ./utils/gen_mnist.py --test 1
 python3 ./utils/gen_sprite.py --test 1
+python3 ./utils/gen_mnist.py --train 1
+python3 ./utils/gen_sprite.py --train 1
 ```
-4. Download the publicly available MOTS training and validation datasets and the public detections from [MOTS](https://www.vision.rwth-aachen.de/page/mots) 
+2. Download the publicly available MOTS training and validation datasets and the public detections from [MOTS](https://www.vision.rwth-aachen.de/page/mots) 
 
 ### Test ###
-5. download pretrained models
-7. To test the models
+1. download pretrained models
+2. To test the models
 
 ### Train ###
-8. To train the models from scratch
+2. To train the models from scratch
 
-### Contribution guidelines ###
+### Evaluation ###
 
-* Writing tests
-* Code review
-* Other guidelines
+1. Quantitative measures
+2. Qualitative results
 
-### Who do I talk to? ###
 
-* Repo owner or admin
-* Other community or team contact
+### Citing USC_MOTS ###
+
+If you find this work helpful in your research, please cite using the following bibtex
+```
+@inproceedings{SiddiqueBMVC2021_USC_MOTS,
+      title={Deep Heterogeneous Autoencoder for Subspace Clustering of Sequential Data}, 
+      author={Abubakar Siddique and Reza Jalil Mozhdehi and Henry Medeiros},
+      year={2020},
+      eprint={2007.07175},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
