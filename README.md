@@ -12,7 +12,11 @@ Unsupervised Spatio-temporal Latent Feature Clustering for Multiple-object Track
 
 ### Installation ###
 
-1. clone this repository and cd to root folder USC_MOTS
+1. clone this repository and go to root folder
+```python
+git clone https://Siddiquemu@bitbucket.org/Siddiquemu/usc_mots.git
+cd usc_mots
+```
 2. create a conda environment
 ```python
 conda env create -f requirements.yml
