@@ -41,6 +41,10 @@ python3 ./utils/gen_sprite.py --train 1
 ### Evaluation ###
 
 1. Quantitative measures
+| Comparison with previous MOTS methods|
+|:-------------------------:|
+|![](./images/usc_mots_eval.png)  |
+
 2. Qualitative results
 
 
