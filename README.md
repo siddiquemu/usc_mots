@@ -46,9 +46,6 @@ python3 ./utils/gen_sprite.py --train 1
 
 2. Qualitative results
 
-![](./images/mot17_1.gif){:height="50%" width="50%"} 
-![](./images/mot17_2.gif){:height="50%" width="50%"}
-
 ### Citing USC_MOTS ###
 
 If you find this work helpful in your research, please cite using the following bibtex
