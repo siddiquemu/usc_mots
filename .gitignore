@@ -9,8 +9,11 @@
 #*/*/*/arbit_weight/
 #*/*/*/MTL
 #*/*/*/MTL
-*.npy
-*.ckpt
+model/
+data/
+#*.npy
+#*.ckpt
+
 
 # Compiled Java class files
 *.class
