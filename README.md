@@ -36,8 +36,10 @@ python ./utils/gen_sprite.py --train 1
 1. download pretrained models
 2. To test the models
 ```
-python USC_KITTI_MOT17.py --dataset KITTI_MOTS
-python USC_KITTI_MOT17.py --dataset MOTSChallenge
+python USC_KITTI_MOT17.py --dataset KITTI
+python USC_KITTI_MOT17.py --dataset MOT17
+python USC_synthetic.py --dataset MNIST
+python USC_synthetic.py --dataset SPRITE
 ```
 
 ### Train ###
