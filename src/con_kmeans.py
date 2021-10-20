@@ -276,7 +276,7 @@ def con_kmeans_det(fr, fr_angles, boxs_feature, latent_feature,mask,
 
     return np.array(labels), np.array(centers)
 
-def temporal_con_kmeans_clustering(fr, X_frames, boxs_feature, latent_feature,mask,
+def con_kmeans_clustering(fr, X_frames, boxs_feature, latent_feature,mask,
                         n_clusters, names, color, im_h, im_w,init_k='kmpp',
                                    detector='noiseless',vis=False, verbose=False):
     # ------------------------------------------------------------------
@@ -538,7 +538,7 @@ def temporal_con_kmeans_revisit(fr, X_frames, boxs_feature, latent_feature,mask_
 
     return np.array(labels), np.array(centers)
 
-def temporal_con_kmeans_mnist(fr, X_frames, boxs_feature, latent_feature,mask_test,
+def con_kmeans_synthetic(fr, X_frames, boxs_feature, latent_feature,mask_test,
                         n_clusters, names, color, t_lag, im_h, im_w, fr_start, key_frame=None,
                         embed_thr=None,init_k=None, dataset_type=None, verbose=False):
     # ------------------------------------------------------------------
@@ -609,7 +609,7 @@ def temporal_con_kmeans_mnist(fr, X_frames, boxs_feature, latent_feature,mask_te
 
                 if x==fr and boxs_feature[:, -1][i] == 0:
                     if dataset_type=='SPRITE..':
-                        if abs(x - y) <= tau and boxIOU <= 0: # TODO: bos iou based constrains are bad for MNIST
+                        if abs(x - y) <= tau and boxIOU <= 0: # TODO: box iou based constrains are bad for MNIST
                             can_not_link_iou.append((i, j))
                             continue
                     else:
