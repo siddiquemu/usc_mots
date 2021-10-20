@@ -46,9 +46,10 @@ python3 USC_KITTI_MOT17.py --dataset MOTSChallenge
 ### Evaluation ###
 
 1. Quantitative measures: clone [mots tools](https://github.com/VisualComputingInstitute/mots_tools)
+
 For synthetic data
 ```
- results/SPRITE/tracking_results
+ cd results/SPRITE/tracking_results
  python -m motmetrics.apps.eval_motchallenge ./evaluation/ ./
 ```
 For real data
