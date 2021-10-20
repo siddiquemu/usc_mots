@@ -7,6 +7,7 @@ Assigning consistent temporal identifiers to multiple moving objects in a video 
 ### Requirements: ###
 * Python 3.7 
 * Tensorflow-gpu 1.14
+* Pytorch 1.1
 * Keras 2.3.1
 * Pycocotools 2.0
 
@@ -34,6 +35,10 @@ python3 ./utils/gen_sprite.py --train 1
 ### Test ###
 1. download pretrained models
 2. To test the models
+```
+python3 USC_KITTI_MOT17.py --dataset KITTI_MOTS
+python3 USC_KITTI_MOT17.py --dataset MOTSChallenge
+```
 
 ### Train ###
 2. To train the models from scratch
@@ -45,8 +50,6 @@ python3 ./utils/gen_sprite.py --train 1
 ![](./images/usc_mots_eval.png)  
 
 2. Qualitative results
-
-![](./images/mot17_1.gif)  ![](./images/mot17_2.gif)
 
 ### Citing USC_MOTS ###
 
