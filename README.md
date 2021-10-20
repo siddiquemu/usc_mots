@@ -25,10 +25,10 @@ conda env create -f requirements.yml
 ### Data Preprocessing ###
 1. Reproduce the synthetic MNIST-MOT and Sprites-MOT datasets, use [tracking-by-animation](https://github.com/zhen-he/tracking-by-animation.git) or
 ```shell
-python3 ./utils/gen_mnist.py --test 1
-python3 ./utils/gen_sprite.py --test 1
-python3 ./utils/gen_mnist.py --train 1
-python3 ./utils/gen_sprite.py --train 1
+python ./utils/gen_mnist.py --test 1
+python ./utils/gen_sprite.py --test 1
+python ./utils/gen_mnist.py --train 1
+python ./utils/gen_sprite.py --train 1
 ```
 2. Download the publicly available MOTS training and validation datasets and the public detections from [MOTS](https://www.vision.rwth-aachen.de/page/mots) 
 
@@ -36,8 +36,8 @@ python3 ./utils/gen_sprite.py --train 1
 1. download pretrained models
 2. To test the models
 ```
-python3 USC_KITTI_MOT17.py --dataset KITTI_MOTS
-python3 USC_KITTI_MOT17.py --dataset MOTSChallenge
+python USC_KITTI_MOT17.py --dataset KITTI_MOTS
+python USC_KITTI_MOT17.py --dataset MOTSChallenge
 ```
 
 ### Train ###
@@ -47,15 +47,16 @@ python3 USC_KITTI_MOT17.py --dataset MOTSChallenge
 
 1. Quantitative measures: clone [mots tools](https://github.com/VisualComputingInstitute/mots_tools)
 
+For real data
+```
+cd results/mots_tools
+python mots_eval/eval.py ./KITTI/tracking_results ./KITTI/gt_folder ./KITTI/val.seqmap.txt
+python mots_eval/eval.py ./MOT17/tracking_results ./MOT17/gt_folder ./MOT17/val.seqmap.txt
+```
 For synthetic data
 ```
  cd results/SPRITE/tracking_results
  python -m motmetrics.apps.eval_motchallenge ./evaluation/ ./
-```
-For real data
-```
-cd mots_tools
-python3 mots_eval/eval.py ./results/KITTI/tracking_results ./data/KITTI/gt_folder ./data/KITTI/val.seqmap.txt
 ```
 2. Qualitative results
 
