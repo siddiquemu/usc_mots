@@ -11,6 +11,7 @@
 #*/*/*/MTL
 model/
 data/
+results/
 #*.npy
 #*.ckpt
 
