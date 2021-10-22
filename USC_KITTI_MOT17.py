@@ -24,9 +24,10 @@ from collections import Counter
 from statistics import mode
 import random
 from numpy.random import seed
+import argparse
 
-pathname = os.path.dirname(sys.argv[0])
-sys.path.insert(0, pathname)
+coderoot = os.path.dirname(sys.argv[0])
+sys.path.insert(0, coderoot)
 
 from src.MTL_CAE_Reshape import DHAE_Model_reshape, test_net
 from src.DHAE_appearance import DHAE_pRGB
@@ -210,22 +211,27 @@ def show_align(t_window_aligned, imgPath_align, names, color):
     img = plot_window(t_window_aligned, names, color, posXY)
     im = Image.fromarray(img)
     im.save(imgPath_align + names[-10:])
+def init_colors(number_of_colors=1500):
+    color = ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)])
+             for i in range(number_of_colors)]
+    color
 
 ## Main Function ####
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, default='KITTI')
+    args = parser.parse_args()
+
     np.random.seed(1234)
-    storage = '/media/siddique/464a1d5c-f3c4-46f5-9dbb-bf729e5df6d61'
-    NAS = '/media/siddique/RemoteServer/LabFiles'
+    color = init_colors()
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
-    color = ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)])
-             for i in range(number_of_colors)]
-    model_type = 'poseApp'#'poseShape'#'poseAppUnet', 'poseApp'-best
-    dataset = 'KITTI'
-    codeBasePath = storage + '/Mask_Instance_Clustering/USC_MOTS_bitbucket/usc_mots/'
+    model_type = 'poseShape'#'poseApp'#'poseShape'
+    dataset = args.dataset
+    codeBasePath = coderoot
     #delete the images in specific paths
     imgPath = storage + '/mots_tools/'+dataset+'/tracking_results/window_exp/'
     mot_evaluation = True
-    model_compnt = 'loc+app'
+    model_compnt = 'loc+shape' #'loc+app'
 
     # parametrers for TCT\\s
     score_th = 0.1 # m=not used
