@@ -3,8 +3,8 @@ import sys
 import os
 pathname = os.path.dirname(sys.argv[0])
 sys.path.insert(0, pathname)
-from cop_kmeans import cop_kmeans, cop_kmeans_constantK,cop_kmeans_dynamicK
-from cop_kmeans_det import cop_kmeans_det
+from src.cop_kmeans import cop_kmeans, cop_kmeans_constantK,cop_kmeans_dynamicK
+from src.cop_kmeans_det import cop_kmeans_det
 import numpy as np
 from sklearn.metrics import jaccard_similarity_score
 from sklearn.metrics import pairwise_distances
