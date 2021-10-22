@@ -9,9 +9,9 @@
 #*/*/*/arbit_weight/
 #*/*/*/MTL
 #*/*/*/MTL
-model/
-data/
-results/
+model/*
+data/*
+results/*
 #*.npy
 #*.ckpt
 
