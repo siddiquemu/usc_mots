@@ -42,7 +42,7 @@ from utils.tct_utils import *
 seed(1)
 import tensorflow as tf
 tf.compat.v1.set_random_seed(2)
-
+np.random.seed(1234)
 
  #python3 mots_eval/eval.py KITTI/tracking_results KITTI/gt_folder KITTI/val.seqmap.txt
 def init_model(codeBasePath=None, model_type='poseApp', MTL=None):
@@ -53,9 +53,9 @@ def init_model(codeBasePath=None, model_type='poseApp', MTL=None):
     if model_type == 'poseApp':
         channel_num = 3
         if MTL:
-            checkpoint_path = codeBasePath + 'model/KITTI_MOT17/rgb/MTL/cp-0493.ckpt'
+            checkpoint_path = os.path.join(codeBasePath, 'model/KITTI_MOT17/rgb/MTL/cp-0493.ckpt')
         if not MTL:
-            checkpoint_path = codeBasePath + 'model/KITTI_MOT17/rgb/arbit_weight/cp-0284.ckpt'
+            checkpoint_path = os.path.join(codeBasePath, 'model/KITTI_MOT17/rgb/arbit_weight/cp-0284.ckpt')
 
         final_model, bottleneck_model, mask_encoder_model, \
         box_encoder_model = DHAE_pRGB(img_y, img_x, box_dim, filters, embed_dim, checkpoint_path, n_G=1,
@@ -78,9 +78,9 @@ def init_model(codeBasePath=None, model_type='poseApp', MTL=None):
     if model_type == 'poseShape':
         channel_num = 1
         if MTL:
-            checkpoint_path = codeBasePath + 'final_model/model_exp/shape-model/MTL/kitti_128/bmvc/var_weight/cp-0164.ckpt'
+            checkpoint_path = os.path.join(codeBasePath, 'model/KITTI_MOT17/shape/MTL/cp-0164.ckpt')
         if not MTL:
-            checkpoint_path = codeBasePath + 'final_model/model_exp/shape-model/arbit_weight/bmvc/no_box_factor/cp-0***.ckpt'
+            checkpoint_path = os.path.join(codeBasePath, 'model/KITTI_MOT17/shape/arbit_weight/cp-0***.ckpt')
 
         final_model, bottleneck_model, mask_encoder_model, \
         box_encoder_model = DHAE_pRGB(img_y, img_x, box_dim, filters, embed_dim, checkpoint_path, n_G=1,
@@ -119,14 +119,14 @@ def load_dataset(codeBasePath, seq, classID, det_thr, data_source = 'public'):
             # from GT: min(w*h)= 6*3=18
 
     if dataset == 'KITTI':
-        data_path = codeBasePath + 'data/KITTI/128_rgb'
+        data_path = os.path.join(codeBasePath, 'data/KITTI/128_rgb')
         boxs = np.load(data_path + '/box0_128_' + seq.split('/')[-1] + '.npy', encoding='bytes')
         masks = np.load(data_path + '/mask0_128_' + seq.split('/')[-1] + '.npy', encoding='bytes')
         masks_28 = np.load(data_path + '/mask0_' + seq.split('/')[-1] + '.npy', encoding='bytes')  # mask rles
         patch_rgb = np.load(data_path + '/patch0_128_' + seq.split('/')[-1] + '.npy', encoding='bytes')
 
     if dataset == 'MOT17':
-        data_path = storage + 'data/MOT17/128_rgb'
+        data_path = os.path.join(codeBasePath, 'data/MOT17/128_rgb')
         boxs = np.load(data_path + '/box0_128_' + seq.split('/')[-1] + '.npy', encoding='bytes')
         masks = np.load(data_path + '/mask0_128_' + seq.split('/')[-1] + '.npy', encoding='bytes')
         masks_28 = np.load(data_path + '/mask0_' + seq.split('/')[-1] + '.npy', encoding='bytes')  # mask rles
@@ -183,55 +183,69 @@ def load_dataset(codeBasePath, seq, classID, det_thr, data_source = 'public'):
     pax_patch_rgb = pax_patch_rgbw
     return pax_boxs, pax_mask, mask_rles, pax_patch_rgb, motsID, img_y, img_x
 
-def init_dirs(seq, out_path, imgPath):
+def init_seq_dirs(seq, out_path, imgPath):
     # seq vis path
-    out_path_seq = out_path + 'vis/' + seq.split('/')[-1] + '/'
+    out_path_seq = os.path.join(out_path, 'vis',  seq.split('/')[-1])
     delete_all(out_path, fmt='png')
     if not os.path.exists(out_path_seq):
         os.makedirs(out_path_seq)
     # directory to visualize alignment
-    imgPath_align = imgPath + seq.split('/')[-1] + '/'
+    imgPath_align = os.path.join(imgPath, seq.split('/')[-1])
     if not os.path.exists(imgPath_align):
         os.makedirs(imgPath_align)
     delete_all(imgPath_align, fmt='png')
     # directory to visualize window tSNE
-    tsne_path = imgPath + seq.split('/')[-1] + '/tsne/'
+    tsne_path = os.path.join(imgPath, seq.split('/')[-1], 'tsne')
     if not os.path.exists(tsne_path):
         os.makedirs(tsne_path)
     delete_all(tsne_path, fmt='png')
 
-    out_mask_path = out_path + 'vis/maskP/' + seq.split('/')[-1] + '/'
+    out_mask_path = os.path.join(out_path, 'vis/maskP', seq.split('/')[-1])
     if not os.path.exists(out_mask_path):
         os.makedirs(out_mask_path)
 
-    return out_path_seq, out_mask_path, imgPath_align, tsne_path
+    #result file
+    mots = open(os.path.join(out_path, seq.split('/')[-1]+ '.txt'), 'w')
+
+    return out_path_seq, out_mask_path, imgPath_align, tsne_path, mots
+
+def init_result_dirs(coderoot, dataset):
+    # output paths
+    out_path = os.path.join(coderoot, 'results', dataset, 'tracking_results')
+    delete_all(out_path, fmt='txt')
+    #exp paths
+    imgPath = os.path.join(out_path, 'window_exp')
+    return out_path, imgPath
 
 def show_align(t_window_aligned, imgPath_align, names, color):
     posXY = [50, 50]
     img = plot_window(t_window_aligned, names, color, posXY)
     im = Image.fromarray(img)
     im.save(imgPath_align + names[-10:])
+
 def init_colors(number_of_colors=1500):
     color = ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)])
              for i in range(number_of_colors)]
-    color
+    return color
 
 ## Main Function ####
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='KITTI')
+    parser.add_argument('--model_type', type=str, default='poseApp')#'poseShape'
     args = parser.parse_args()
 
-    np.random.seed(1234)
-    color = init_colors()
-    os.environ["CUDA_VISIBLE_DEVICES"]="0"
-    model_type = 'poseShape'#'poseApp'#'poseShape'
+
+    os.environ["CUDA_VISIBLE_DEVICES"]="1"
+    model_type = args.model_type
     dataset = args.dataset
     codeBasePath = coderoot
-    #delete the images in specific paths
-    imgPath = storage + '/mots_tools/'+dataset+'/tracking_results/window_exp/'
+
     mot_evaluation = True
-    model_compnt = 'loc+shape' #'loc+app'
+    if model_type =='poseApp':
+        model_compnt = 'loc+app'
+    else:
+        model_compnt = 'loc+shape'
 
     # parametrers for TCT\\s
     score_th = 0.1 # m=not used
@@ -262,6 +276,7 @@ if __name__ == '__main__':
     DHAE_clustering = 1
 
     vis=0
+    color = init_colors()
     print_stat = 1
     keep_track_id_start = []
 
@@ -273,7 +288,7 @@ if __name__ == '__main__':
         img_align = 0
         # read evaluation sequences
         img_format = '.jpg'
-        folders = glob.glob(NAS + '/MOTS/MOT17/imgs/' + '*')
+        folders = glob.glob(os.path.join(coderoot, 'data/MOT17/imgs/*'))
         folders.sort(key=lambda f: int(''.join(filter(str.isdigit, str(f)))))
         seqs = folders
         motsID = 2
@@ -281,7 +296,7 @@ if __name__ == '__main__':
     if dataset=='KITTI':
         img_align = 0
         img_format = '.png'
-        folders = glob.glob(NAS + '/MOTS/KITTI/training/image_02/' + '*')
+        folders = glob.glob(os.path.join(coderoot, 'data/KITTI/training/image_02/*'))
         folders.sort(key=lambda f: int(''.join(filter(str.isdigit, str(f)))))
         # Get validation data sequences
         val_set = [folders[-19], folders[-15], folders[-14], folders[-13], folders[-11], folders[-8], folders[-7],
@@ -290,11 +305,8 @@ if __name__ == '__main__':
 
     frame_count = 0
     time_count = 0
-    # output paths
-    out_path = codeBasePath.split('Mask_Instance_Clustering')[0] \
-               + '/mots_tools/' + dataset + '/tracking_results/'
-    delete_all(out_path, fmt='txt')
 
+    out_path, imgPath = init_result_dirs(coderoot, dataset)
     for seq in seqs:
         keep_track_id_start = []
         # read features: PANet or Mask-RCNN, Resnet50 or 101: current: Mask-RCNN X101
@@ -304,10 +316,10 @@ if __name__ == '__main__':
         if pax_boxs is None:
             continue
         out_path_seq, out_mask_path, \
-        imgPath_align, tsne_path = init_dirs(seq, out_path, imgPath)
+        imgPath_align, tsne_path, mots = init_seq_dirs(seq, out_path, imgPath)
 
         # read benchmarq images
-        path = seq+'/*'+img_format
+        path = os.path.join(seq,'*'+img_format)
         files = glob.glob(path)
         files.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
         # prepare image path set
@@ -318,7 +330,7 @@ if __name__ == '__main__':
             img_set[img_indx] = name
             img_indx+=1
 
-        mots = open(out_path + seq.split('/')[-1] + '.txt','w')
+
         # initialize the global variables
         det_cluster_id = None
         dets_align_centers = None
@@ -338,6 +350,7 @@ if __name__ == '__main__':
         vis_window=False
         #get copy of boxes to keep separate the aligned and unaligned boxes
         pax_boxs_align = copy.deepcopy(pax_boxs)
+        print(seqs)
         for names in files:
             print(names)
             im = cv2.imread(names)
@@ -398,7 +411,7 @@ if __name__ == '__main__':
                         x_test = temp_window_pmask
                         mask_x_test = np.reshape(x_test, [x_test.shape[0], img_y, img_x, 1])
                         if model_compnt == 'loc+shape':
-                            latent_feature = bottleneck_model.predict([patch_x_test, pax_box_norm])
+                            latent_feature = bottleneck_model.predict([mask_x_test, pax_box_norm])
 
 
                     X_frames = temp_pax_boxs[:,0].astype(np.float32)
