@@ -23,27 +23,34 @@ cd usc_mots
 conda env create -f requirements.yml
 ```
 ### Data Preprocessing ###
-1. Reproduce the synthetic MNIST-MOT and Sprites-MOT datasets, use [tracking-by-animation](https://github.com/zhen-he/tracking-by-animation.git) or
+1. Download the preprocessed data and trained models from [usc-mots-model](https://drive.google.com/file/d/1fP6yCTF_8CUzwjlE7gU1h76_9EwWJaLb/view?usp=sharing) and put the data and model folders in the cloned repo
+2. To reproduce the synthetic MNIST-MOT and Sprites-MOT datasets, use [tracking-by-animation](https://github.com/zhen-he/tracking-by-animation.git) or
 ```shell
 python ./utils/gen_mnist.py --test 1
 python ./utils/gen_sprite.py --test 1
 python ./utils/gen_mnist.py --train 1
 python ./utils/gen_sprite.py --train 1
 ```
-2. Download the publicly available MOTS training and validation datasets and the public detections from [MOTS](https://www.vision.rwth-aachen.de/page/mots) 
-
+3. To reproduce the preprocessed public data for usc-mots, i) Download the publicly available MOTS training and validation datasets and the public detections from [MOTS](https://www.vision.rwth-aachen.de/page/mots) and then run the following lines of code from the root directory
+ 
+```shell
+python ./utils/gen_mots.py --test 1 --dataset KITTI
+python ./utils/gen_mots.py --train 1 --dataset KITTI
+```
 ### Test ###
 1. download pretrained models
 2. To test the models
 ```
-python USC_KITTI_MOT17.py --dataset KITTI
-python USC_KITTI_MOT17.py --dataset MOT17
-python USC_synthetic.py --dataset MNIST
-python USC_synthetic.py --dataset SPRITE
+python USC_KITTI_MOT17.py --dataset KITTI --MTL 1
+python USC_KITTI_MOT17.py --dataset MOT17 --MTL 1
+python USC_synthetic.py --dataset MNIST --MTL 1
+python USC_synthetic.py --dataset SPRITE --MTL 1
 ```
 
 ### Train ###
 2. To train the models from scratch
+python train_real.py --model_type poseAPP --MTL 1
+python train_synthetic.py --model_type MNIST --MTL 1
 
 ### Evaluation ###
 
@@ -66,12 +73,12 @@ For synthetic data
 
 If you find this work helpful in your research, please cite using the following bibtex
 ```
-@inproceedings{SiddiqueBMVC2021_USC_MOTS,
-      title={Deep Heterogeneous Autoencoder for Subspace Clustering of Sequential Data}, 
-      author={Abubakar Siddique and Reza Jalil Mozhdehi and Henry Medeiros},
-      year={2020},
-      eprint={2007.07175},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@inproceedings{siddiqueBMVC2021_usc_mots,
+title={Unsupervised Spatio-temporal Latent Feature Clustering for Multiple-object Tracking and Segmentation}, 
+author={Abubakar Siddique and Reza Jalil Mozhdehi and Henry Medeiros},
+year={2021},
+eprint={2007.07175},
+archivePrefix={arXiv},
+primaryClass={cs.CV}
 }
 ```
