@@ -39,6 +39,7 @@ python ./utils/gen_mots.py --train 1 --dataset KITTI
 ```
 ### Test ###
 1. To test the models
+
 ```
 python USC_KITTI_MOT17.py --dataset KITTI --MTL 1
 python USC_KITTI_MOT17.py --dataset MOT17 --MTL 1
@@ -49,8 +50,10 @@ python USC_synthetic.py --dataset SPRITE --MTL 1
 ### Train ###
 2. To train the models from scratch
 
+```
 python train_real.py --model_type poseAPP --MTL 1
 python train_synthetic.py --model_type MNIST --MTL 1
+```
 
 ### Evaluation ###
 
