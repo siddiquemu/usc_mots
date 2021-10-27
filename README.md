@@ -1,5 +1,5 @@
 # Unsupervised Spatio-temporal Latent Feature Clustering for Multiple-object Tracking and Segmentation.
-(Accepted by BMVC 2021). Preprint available at ....
+(Accepted by BMVC 2021). Preprint available at [Paper](https://arxiv.org/abs/2007.07175)
 
 Assigning consistent temporal identifiers to multiple moving objects in a video sequence is a challenging problem. A solution to that problem would have immediate ramifications in multiple object tracking and segmentation problems. We propose a strategy that treats the temporal identification task as a spatio-temporal clustering problem. We propose an unsupervised learning approach using a convolutional and fully connected autoencoder, which we call deep heterogeneous autoencoder, to learn discriminative features from segmentation masks and detection bounding boxes. We extract masks and their corresponding bounding boxes from a pretrained semantic segmentation network and train the autoencoders jointly using task-dependent uncertainty weights to generate common latent features. We then construct constraints graphs that encourage associations among objects that satisfy a set of known temporal conditions. The feature vectors and the constraints graphs are then provided to the kmeans clustering algorithm to separate the corresponding data points in the latent space. We evaluate the performance of our method using challenging synthetic and real-world multiple-object video datasets. Our results show that our technique outperforms several state-of-the-art methods.
 
@@ -38,8 +38,7 @@ python ./utils/gen_mots.py --test 1 --dataset KITTI
 python ./utils/gen_mots.py --train 1 --dataset KITTI
 ```
 ### Test ###
-1. download pretrained models
-2. To test the models
+1. To test the models
 ```
 python USC_KITTI_MOT17.py --dataset KITTI --MTL 1
 python USC_KITTI_MOT17.py --dataset MOT17 --MTL 1
@@ -49,6 +48,7 @@ python USC_synthetic.py --dataset SPRITE --MTL 1
 
 ### Train ###
 2. To train the models from scratch
+
 python train_real.py --model_type poseAPP --MTL 1
 python train_synthetic.py --model_type MNIST --MTL 1
 
