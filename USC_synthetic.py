@@ -7,7 +7,7 @@ import numpy as np
 import random
 import sys
 import matplotlib.pyplot as plt
-
+import argparse
 from keras.models import Model
 from keras.models import model_from_json
 from keras.models import load_model
@@ -178,20 +178,31 @@ def init_colors(number_of_colors = 1500):
 
 ## Main Function ##############################################################################
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, default='MNIST')
+    parser.add_argument('--model_type', type=str, default='poseShape')
+    parser.add_argument('--MTL', type=int, default=1)
+    args = parser.parse_args()
+
     # set cuda
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     codeBase = codebase
 
-    dataset = 'SPRITE'#'MNIST'
-    vid_seq = False
-    mht_clustering = False
-    save_data_baselines = 0
+    dataset = args.dataset
     init_clusters = 'new_det'#'kmpp'
-    model_compnt = 'loc+shape'
 
-    MTL = 1
-    ours = 1
+    if args.model_type=='poseShape':
+        model_compnt = 'loc+shape'
+    elif args.model_type=='pose':
+        model_compnt = 'loc'
+    elif args.model_type == 'shape':
+        model_compnt = 'shape'
+    else:
+        print('use --model_type poseShape or pose or shape')
+
+    #TODO: _config file for all parameters
+    MTL = args.MTL
     prior = 0 # 0:estimated k-value (no prior k)
     constraints = 1
     mot_evaluation = 1
@@ -199,13 +210,14 @@ if __name__ == '__main__':
     usc_tracker = 1
     print_stat = 1
     keep_track_id_start = []
-    dists_cls = {'MNIST': 2.5, 'SPRITE':2.5}
+    dists_cls = {'MNIST': 2.5, 'SPRITE':1.0}
     embed_thr = dists_cls[dataset]
 
     # set params
     im_w = 128
     im_h = 128
     time_lag = 3
+    tau = 2
     score_th = 0.1
     min_cluster_size = 2
     img_y = 28
@@ -213,17 +225,13 @@ if __name__ == '__main__':
 
     n_G = 1
     color = init_colors(number_of_colors=1500)
+    vis = 1
     det_cluster_id = None
-
-    # initialize the global variables
-    pax_eval = []
-    combined_mask_per_frame = {}
     # initialize tracker ID
     ID_ind = 1
     score_th = 0.2
     # tracklets array
     trackers = {}
-
     # clustering metrics
     ami = []
     nmi = []
@@ -282,7 +290,7 @@ if __name__ == '__main__':
                 #current frame first
                 assert pax_box_norm.shape[0]==temp_window_mask.shape[0],'pose.shape==mask.shape but ' \
                                                                          'found {} and {}'.format(pax_box_norm.shape,temp_window_mask.shape)
-                assert temp_window_mask.max()==255, 'found max value of binary mask {}'.format(temp_window_mask.max())
+                assert temp_window_mask.max() in [255, 254], 'found max value of binary mask {}'.format(temp_window_mask.max())
                 x_test = temp_window_mask.astype('float32') / 255.
                 x_test = x_test.reshape([x_test.shape[0], x_test.shape[1] * x_test.shape[2]])
 
@@ -297,23 +305,13 @@ if __name__ == '__main__':
                     mask_encoding = mask_encoder_model.predict([mask_x_test])
                 if model_compnt == 'loc':
                     latent_feature = box_encoder_model.predict([pax_box_norm])
-                #latent_feature = temp_window_pmask.reshape(temp_window_pmask.shape[0],img_y*img_x)
-                #plot_latent_feature(x_test, latent_feature,decoded_imgs,img_y,img_x,names)
-                #plot clustered result using t-SNE
-                #plot_tSNE(fr,pax_box_norm,mask_encoding,box_encoding,
-                #            latent_feature,labels=temp_window_pbox[:,1],path=feature_path)
+
                 if DHAE_clustering:
                     # Select k value as unique target in temporal window
                     if prior:
                         k_class = len(np.unique(temp_window_box[:,1]))
                     if not prior:
-                        #TODO: implement cumsum of the differences of Ot
                         k_class = k_value.max()
-
-                        #k_class = cumsum_diff(k_window=k_value[::-1])
-                        # k_class == k_class_old
-                        #assert  k_class==k_class_old, 'k>max cardinality {}, k> cumsum of positive differences of detections {}' \
-                                                      #' but the gt ids {}'.format(k_class_old, k_class, np.unique(temp_window_pbox[:,1]))
                     # TODO: k-value remain same even though the some data points violate the constraints and unable to be clustered
                     if not constraints:
                         kmeans = KMeans(n_clusters=k_class)
@@ -330,29 +328,18 @@ if __name__ == '__main__':
                                                                      names,
                                                                      color,
                                                                      im_h, im_w,
+                                                                     tau=tau,
+                                                                     embed_thr=embed_thr,
                                                                      init_k=init_clusters,
                                                                      detector='constant_k',
                                                                      vis=False,
                                                                      verbose=True)
 
                     labels_true = np.array(temp_window_box[:, 1])
-                    if mht_clustering:
-                        if vid_seq:
-                            labels_pred = box_seq_mht[0, fr][::-1][:, 1]
-                        else:
-                            labels_pred = x_mht_loc['video_ids'][0,fr-1][::-1][:,1]
-                        print('GT Labels: ', labels_true)
-                        print('Predicted Labels: ', labels_pred)
-                        assert len(labels_true) == len(labels_pred)
-                        if len(np.unique(labels_pred)) != k_class:
-                            print('outlier remain unclustered')
-                            clusters_ = [-1 if c > k_class else c for c in labels_pred]
-                            labels_pred = np.array(clusters_)
-                    else:
-                        labels_pred = labels
-                        print('GT Labels: ', labels_true)
-                        print('Predicted Labels: ', labels_pred)
-                        assert len(labels_true) == len(labels_pred)
+                    labels_pred = labels
+                    print('GT Labels: ', labels_true)
+                    print('Predicted Labels: ', labels_pred)
+                    assert len(labels_true) == len(labels_pred)
 
 
                     ami_f = metrics.adjusted_rand_score(labels_true, labels_pred)
@@ -397,6 +384,7 @@ if __name__ == '__main__':
                                                     im_h,
                                                     im_w,
                                                     fr_start,
+                                                    tau=tau,
                                                     key_frame=key_frame,
                                                     embed_thr=embed_thr,
                                                     init_k=init_clusters,
@@ -423,5 +411,5 @@ if __name__ == '__main__':
                     print('Total tracked ID:', ID_ind - 1)
         fr += 1
     save_tracks(trackers, tracker_file, out_path_seq, fr_start,
-                fr_end, color, im_h, im_w, data_path, img_format='.png', vis=False)
+                fr_end, color, im_h, im_w, data_path, img_format='.png', vis=vis)
 

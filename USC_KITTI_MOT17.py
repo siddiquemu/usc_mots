@@ -147,7 +147,7 @@ def load_dataset(codeBasePath, seq, classID, det_thr, data_source = 'public'):
     masks = masks[np.where(boxs[:, 6] >= det_thr), :, :][0]
     boxs = boxs[np.where(boxs[:, 6] >= det_thr), :][0]
     # select the required classes based on benchmark
-    if tct_multicalss:
+    if usc_multicalss:
         pax_patch_rgb = patch_rgb
         pax_boxs = boxs
         pax_mask = masks
@@ -212,9 +212,13 @@ def init_seq_dirs(seq, out_path, imgPath):
 def init_result_dirs(coderoot, dataset):
     # output paths
     out_path = os.path.join(coderoot, 'results', dataset, 'tracking_results')
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
     delete_all(out_path, fmt='txt')
     #exp paths
     imgPath = os.path.join(out_path, 'window_exp')
+    if not os.path.exists(imgPath):
+        os.makedirs(imgPath)
     return out_path, imgPath
 
 def show_align(t_window_aligned, imgPath_align, names, color):
@@ -232,7 +236,8 @@ def init_colors(number_of_colors=1500):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='KITTI')
-    parser.add_argument('--model_type', type=str, default='poseApp')#'poseShape'
+    parser.add_argument('--model_type', type=str, default='poseApp')
+    parser.add_argument('--MTL', type=int, default=1)
     args = parser.parse_args()
 
 
@@ -244,40 +249,47 @@ if __name__ == '__main__':
     mot_evaluation = True
     if model_type =='poseApp':
         model_compnt = 'loc+app'
-    else:
+    elif model_type == 'poseShape':
         model_compnt = 'loc+shape'
+    else:
+        print('use --model_type poseApp or --model_type poseShape')
 
-    # parametrers for TCT\\s
-    score_th = 0.1 # m=not used
-    min_cluster_size = 2#2
-    tct_multicalss = 0
+    # parametrers for USC
+    time_lag = 3  # 8 #3
+    score_th = 0.1
+    min_cluster_size = 2
     graph_metric = 'mask_iou'
     iou_thr = 0.0
     #parameter for DHAE-SC
     n_G = 1
 
-    time_lag = 3  # 8 #3
+
     if dataset=='MOT17':
-        alpha_t=2 #2:MOT17
-        min_track_size = 5  # 5:MOT17
-        category_id = 2  #[mot17: 2:ped]
+        usc_multicalss = 0
+        alpha_t=2
+        min_track_size = 5
+        category_id = 2
     if dataset=='KITTI':
-        alpha_t = 1  # 1:kitti
-        min_track_size = 3  #3:kitti
+        usc_multicalss = 0
+        alpha_t = 1
+        min_track_size = 3
         category_id = 1  # [kitti: 1:car, 2:ped]
 
-    if category_id==1:
-        det_thr = 0.6
-    if category_id==2:
-        det_thr = 0.7
+    if usc_multicalss:
+        det_thr = 0.65
+    else:
+        if category_id==1:
+            det_thr = 0.6
+        if category_id==2:
+            det_thr = 0.7
 
-    MTL = 1
+    MTL = args.MTL
     Constraints = 1
     DHAE_clustering = 1
 
-    vis=0
+    vis=1
     color = init_colors()
-    print_stat = 1
+    print_stat = 0
     keep_track_id_start = []
 
     # use trained DHAE to get embedded feature for clustering
@@ -416,10 +428,6 @@ if __name__ == '__main__':
 
                     X_frames = temp_pax_boxs[:,0].astype(np.float32)
                     X_frames = X_frames.copy(order='C')
-                    #latent_feature = pax_box_norm
-                    if fr%100000==0 and len(latent_feature)<=10:
-                        plot_embed_affinity(patch_x_test, latent_feature, decoded_imgs, img_y, img_x, names, out_path, seq.split('/')[-1], color)
-                        plot_latent_feature(patch_x_test, latent_feature,decoded_imgs,img_y,img_x,names,out_path,seq.split('/')[-1])
 
                     # Compute optimum k-values in k-means for target clusters at current frame
                     # new_det init only when max() method use to compute k
@@ -446,7 +454,7 @@ if __name__ == '__main__':
                                                                      alpha_t=alpha_t,
                                                                      graph_metric=graph_metric,
                                                                      initialization=init_k,
-                                                                     verbose=True
+                                                                     verbose=print_stat
                                                                      )
                     else:
                         kmeans = KMeans(n_clusters=max_instances_at_t)
@@ -493,6 +501,7 @@ if __name__ == '__main__':
             plt.close()
         #pdb.set_trace()
         # save trackers for mots evaluation
+        print('saving results to {}'.format(mots))
         save_mots(trackers, mots, ID_ind-1, fr_start, fr_end, color, im_h, im_w,
                   out_mask_path, out_path_seq, seq, dataset,
                   img_format, class_label=motsID, scta=0, min_track_size=min_track_size, vis=vis)
