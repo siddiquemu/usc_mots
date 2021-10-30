@@ -149,7 +149,7 @@ def cop_kmeans(dataset,labels, temporal_w,
                k_frame=None,
                initialization='kmpp', verbose=0,
                max_iter=50, tol=1e-4):
-   #used in: TCT_KITTI
+   #used in: USC_KITTI
     ml, cl = transitive_closure(ml, cl, len(dataset))
     ml_info = get_ml_info(ml, dataset)
     tol = tolerance(tol, dataset)
