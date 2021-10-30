@@ -1,4 +1,14 @@
-from keras.layers import Input, Dense, Conv2D,Dropout, MaxPooling2D, UpSampling2D,Deconvolution2D, Flatten, Reshape, BatchNormalization
+
+import os
+import time
+import sys
+import glob
+import math
+coderoot = os.path.dirname(sys.argv[0])
+sys.path.insert(0, coderoot)
+
+from keras.layers import Input, Dense, Conv2D,Dropout, MaxPooling2D, UpSampling2D,\
+    Deconvolution2D, Flatten, Reshape, BatchNormalization
 from keras.models import Model
 from keras.layers.merge import concatenate
 from keras.engine.topology import Layer, InputSpec
@@ -21,11 +31,6 @@ import cv2
 import tensorflow as tf
 from keras.initializers import Constant
 #from scipy.misc import imsave
-import os
-import time
-import sys
-import glob
-import math
 from keras import objectives
 from keras.engine.topology import Layer
 #np.random.seed(10)
@@ -482,106 +487,89 @@ def visualize_reconstruction(x_test, encoded_imgs, decoded_imgs,img_y,img_x,mode
 
 # Train autoencoder - Main Function
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-    codebase_path = '/media/siddique/464a1d5c-f3c4-46f5-9dbb-bf729e5df6d61/Mask_Instance_Clustering'
-    evaluation = 'train'
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, default='KITTI')
+    parser.add_argument('--model_type', type=str, default='poseApp')
+    parser.add_argument('--MTL', type=int, default=1)
+    args = parser.parse_args()
+
+
+    os.environ["CUDA_VISIBLE_DEVICES"]="1"
+    model_type = args.model_type
+    dataset = args.dataset
+    codebase_path = coderoot
+    isMTL = args.MTL
+
+    #set params
+    img_y = 128
+    img_x = 128
+    channel_num = 3
+    box_dim = 4
+    filters = [16, 32, 32, 64]
+    embed_dim = 128
+
     vis_reconstruction = 0
-    dataset = 'kitti_rgb'
-    isMTL = 1
-    # Save Checkpoints
-    if evaluation == 'train':
-        t = time.process_time()
-        if dataset=='kitti_shape':
-            x_m = np.load(codebase_path + '/train_data_all/train_mask_mot_all0_reshape128_kitti.npy',encoding='bytes')
-            x_b = np.load(codebase_path + '/train_data_all/train_box_mot_all0_reshape128_kitti.npy',encoding='bytes')
-            x_train_mask, x_test_mask = prepare_data_mask(x_m)
-            x_train_box, x_test_box = prepare_data_box(x_b)
-            assert x_train_box.shape[0]==x_train_mask.shape[0],'multi-task instances should be equal but found (mask,box) > ({},{})'.format(x_train_mask.shape[0],x_train_box.shape[0])
-            model_path = codebase_path + '/final_model/checkpoints_MOTS_128_kitti/'
-        if dataset=='kitti_rgb':
-            x_m = np.load(codebase_path+'/train_data_all/rgb/train_mask_mot_all0_reshape128_kitti_mot17.npy',encoding='bytes')
-            x_b = np.load(codebase_path+'/train_data_all/rgb/train_box_mot_all0_reshape128_kitti_mot17.npy',encoding='bytes')
-            x_train_mask, x_test_mask = prepare_data_mask(x_m)
-            x_train_box, x_test_box = prepare_data_box(x_b)
-            assert x_train_box.shape[0]==x_train_mask.shape[0],'multi-task instances should be equal but found (mask,box) > ({},{})'.format(x_train_mask.shape[0],x_train_box.shape[0])
-            #model_path = codebase_path+'/final_model/checkpoints_MOTS_128_kitti_appearance128/'
-            #new exp: bmvc
-            if isMTL:
-                model_path = codebase_path + '/final_model/model_exp/MTL/kitti_128/bmvc/var_weight_henry/'
-            else:
-                model_path = codebase_path + '/final_model/model_exp/arbit_weight/kitti_128/var_wight/'
 
+    #start train
+    t = time.process_time()
 
+    if model_type == 'poseShape':
+        x_m = np.load(os.path.join(codebase_path, 'data/KITTI/train_data/train_mask_mot_all0_reshape128_kitti.npy',encoding='bytes'))
+        x_b = np.load(os.path.join(codebase_path, 'data/KITTI/train_data/train_box_mot_all0_reshape128_kitti.npy',encoding='bytes'))
+        x_train_mask, x_test_mask = prepare_data_mask(x_m)
+        x_train_box, x_test_box = prepare_data_box(x_b)
+        assert x_train_box.shape[0]==x_train_mask.shape[0],'multi-task instances should be equal but found (mask,box) > ({},{})'.format(x_train_mask.shape[0],x_train_box.shape[0])
+        model_path = os.path.join(codebase_path, 'model/KITTI_MOT17/shape/MTL')
 
-        '''
-        aug = ImageDataGenerator(width_shift_range=0.1,
-        height_shift_range=0.1, horizontal_flip=True,
-        fill_mode="nearest")
-        '''
-        img_y=128
-        img_x=128
-        channel_num = 3
-        box_dim = 4
-        filters = [16,32,32,64] # iccv2021
-        #filters = [32, 64, 64, 128]
-        embed_dim = 128
+    if model_type =='poseApp':
+        x_m = np.load(os.path.join(codebase_path, 'data/KITTI/train_data/train_mask_mot_all0_reshape128_kitti_mot17.npy',encoding='bytes'))
+        x_b = np.load(os.path.join(codebase_path, 'data/KITTI/train_data/train_box_mot_all0_reshape128_kitti_mot17.npy',encoding='bytes'))
+        x_train_mask, x_test_mask = prepare_data_mask(x_m)
+        x_train_box, x_test_box = prepare_data_box(x_b)
+        assert x_train_box.shape[0]==x_train_mask.shape[0],'multi-task instances should be equal but found (mask,box) > ({},{})'.format(x_train_mask.shape[0],x_train_box.shape[0])
+        #model_path = codebase_path+'/final_model/checkpoints_MOTS_128_kitti_appearance128/'
+        #new exp: bmvc
+        if isMTL:
+            model_path = os.path.join(codebase_path, 'model/KITTI_MOT17/rgb/MTL')
+        else:
+            model_path = os.path.join(codebase_path, 'model/KITTI_MOT17/rgb/arbit_weight')
 
-        if evaluation=='train' and not vis_reconstruction:
-            final_model, bottleneck_model, \
-            mask_encoder_model, box_encoder_model = DHAE_pRGB(img_y,
-                                                             img_x,
-                                                             box_dim,
-                                                             filters,
-                                                             embed_dim,
-                                                             model_path,
-                                                             n_G=1,
-                                                             MTL=isMTL,
-                                                             optimizer='adadelta',
-                                                             channel=channel_num).train(x_train_mask,x_train_box)
-            if not isMTL:
-                decoded_imgs,decoded_box = final_model.predict([x_test_mask,x_test_box])
-            else:
-                input_img, \
-                input_box, \
-                decoded_imgs, \
-                decoded_box = final_model.predict([x_test_mask,x_test_box])
-            #concat_feature = concatenated_model.predict([x_test_mask,x_test_box])
-            #load weights into the bottleneck model
-            bottleneck_model.set_weights(final_model.get_weights()[:28])
-            bottleneck_feature = bottleneck_model.predict([x_test_mask,x_test_box])
-            import matplotlib.pylab as pylab
-            pylab.plot(final_model.history.history['loss'])
-            pylab.show()
-            loss_curve(final_model,model_path)
-            visualize_reconstruction(x_test_mask, bottleneck_feature, decoded_imgs,img_y,img_x,model_path)
+    final_model, bottleneck_model, \
+    mask_encoder_model, box_encoder_model = DHAE_pRGB(img_y,
+                                                     img_x,
+                                                     box_dim,
+                                                     filters,
+                                                     embed_dim,
+                                                     model_path,
+                                                     n_G=1,
+                                                     MTL=isMTL,
+                                                     optimizer='adadelta',
+                                                     channel=channel_num).train(x_train_mask,x_train_box)
+    print('total training time {} secs'.format(time.process_time() - t))
 
-            # Found Standard Deviations
-            print([np.exp(K.get_value(log_var[0]))**0.5 for log_var in final_model.layers[-1].log_vars])
-
-            print('%f' % (time.process_time()-t))
     if vis_reconstruction:
-        #load test_net
-        checkpoint_path = model_path + 'cp-1000.ckpt'
-        final_model, bottleneck_model, mask_encoder_model, \
-        box_encoder_model = DHAE_pRGB(img_y,
-                                      img_x,
-                                      box_dim,
-                                      filters,
-                                      embed_dim,
-                                      checkpoint_path,
-                                      n_G=1,
-                                      MTL=True).test_net()
-        print('load checkpoint from {}'.format(checkpoint_path))
-        final_model.load_weights(checkpoint_path)
-        input_img, input_box, decoded_imgs, decoded_box = final_model.predict([x_test_mask, x_test_box])
-        bottleneck_feature = bottleneck_model.predict([x_test_mask, x_test_box])
-        visualize_reconstruction(x_test_mask,
-                                 bottleneck_feature,
-                                 decoded_imgs,
-                                 img_y,
-                                 img_x,
-                                 model_path)
-        print('reconstruction of random test images ae saved at {}'.format(model_path))
+        if not isMTL:
+            decoded_imgs,decoded_box = final_model.predict([x_test_mask,x_test_box])
+        else:
+            input_img, \
+            input_box, \
+            decoded_imgs, \
+            decoded_box = final_model.predict([x_test_mask,x_test_box])
+        #concat_feature = concatenated_model.predict([x_test_mask,x_test_box])
+        #load weights into the bottleneck model
+        bottleneck_model.set_weights(final_model.get_weights()[:28])
+        bottleneck_feature = bottleneck_model.predict([x_test_mask,x_test_box])
+        import matplotlib.pylab as pylab
+        pylab.plot(final_model.history.history['loss'])
+        pylab.show()
+        loss_curve(final_model,model_path)
+        visualize_reconstruction(x_test_mask, bottleneck_feature, decoded_imgs,img_y,img_x,model_path)
+
+        # Found Standard Deviations
+        print([np.exp(K.get_value(log_var[0]))**0.5 for log_var in final_model.layers[-1].log_vars])
+
+
 
 
 
