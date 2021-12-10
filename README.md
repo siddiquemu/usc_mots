@@ -15,7 +15,7 @@ Assigning consistent temporal identifiers to multiple moving objects in a video 
 
 1. clone this repository and go to root folder
 ```python
-git clone https://Siddiquemu@bitbucket.org/Siddiquemu/usc_mots.git
+git clone https://github.com/siddiquemu/usc_mots.git
 cd usc_mots
 ```
 2. create a conda environment
@@ -79,9 +79,7 @@ If you find this work helpful in your research, please cite using the following 
 @inproceedings{siddiqueBMVC2021_usc_mots,
 title={Unsupervised Spatio-temporal Latent Feature Clustering for Multiple-object Tracking and Segmentation}, 
 author={Abubakar Siddique and Reza Jalil Mozhdehi and Henry Medeiros},
+booktitle={Proceedings of the British Machine Vision Conference},
 year={2021},
-eprint={2007.07175},
-archivePrefix={arXiv},
-primaryClass={cs.CV}
 }
 ```
